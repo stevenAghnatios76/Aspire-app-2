@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "mcp__supabase__search_docs",
+      "Bash(cat \"/Users/stevenagh76/.claude/projects/-Users-stevenagh76-Documents-Aspire-app-2/8d2d73ea-a20b-4cc2-a421-5cc4cc27c229/tool-results/mcp-supabase-search_docs-1772125711004.txt\" | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor item in data:\n    text = item.get\\('text', ''\\)\n    # Parse the nested JSON\n    parsed = json.loads\\(text\\) if text.startswith\\('{'\\) else {}\n    nodes = parsed.get\\('data', {}\\).get\\('searchDocs', {}\\).get\\('nodes', []\\)\n    for node in nodes:\n        title = node.get\\('title', 'N/A'\\)\n        href = node.get\\('href', 'N/A'\\)\n        subs = node.get\\('subsections', {}\\).get\\('nodes', []\\)\n        print\\(f'== {title} =='\\)\n        print\\(f'   {href}'\\)\n        for sub in subs[:5]:\n            print\\(f'   - {sub.get\\(\\\\\"title\\\\\", \\\\\"\\\\\"\\)}'\\)\n            content = sub.get\\('content', ''\\)\n            if content and len\\(content\\) > 500:\n                content = content[:500] + '...'\n            if content:\n                print\\(f'     {content[:200]}'\\)\n        print\\(\\)\n\" 2>&1 | head -100)",
+      "Bash(cat \"/Users/stevenagh76/.claude/projects/-Users-stevenagh76-Documents-Aspire-app-2/8d2d73ea-a20b-4cc2-a421-5cc4cc27c229/tool-results/mcp-supabase-search_docs-1772125711004.txt\" | python3 -c \"\nimport json, sys\nraw = sys.stdin.read\\(\\)\ndata = json.loads\\(raw\\)\nfor item in data:\n    text = item.get\\('text', ''\\)\n    # Find JSON objects in the text\n    if 'searchDocs' in text:\n        # Extract subsection content about middleware, createServerClient etc.\n        import re\n        # Find createServerClient mentions\n        matches = re.findall\\(r'createServerClient.*?\\\\n', text[:5000]\\)\n        for m in matches[:5]:\n            print\\(m.strip\\(\\)[:200]\\)\n        # Find middleware mentions  \n        matches = re.findall\\(r'middleware.*?\\\\n', text[:5000]\\)\n        for m in matches[:5]:\n            print\\(m.strip\\(\\)[:200]\\)\n\" 2>&1)",
+      "Bash(cd \"/Users/stevenagh76/Documents/Aspire app 2\" && npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir --no-git --import-alias \"@/*\" 2>&1)",
+      "Bash(cd \"/Users/stevenagh76/Documents/Aspire app 2\" && npx shadcn@latest add button card input label textarea select badge dialog toast separator tabs alert sheet dropdown-menu avatar form -y 2>&1)",
+      "Bash(cd \"/Users/stevenagh76/Documents/Aspire app 2\" && npx next build 2>&1 | t)"
+    ]
+  }
+}
