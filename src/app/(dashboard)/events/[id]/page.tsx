@@ -9,10 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Monitor, Calendar, Clock, Users, Trash2, Edit } from "lucide-react";
+import { MapPin, Monitor, Calendar, Clock, Users, Trash2, Edit, CalendarPlus } from "lucide-react";
 import { formatDate, formatTime } from "@/utils/dates";
+import { buildGoogleCalendarUrl } from "@/utils/google-calendar";
 import { InviteeSuggestions } from "@/components/ai/InviteeSuggestions";
-import { EventWithMeta, RsvpStatus } from "@/types/firestore";
+import { EventRecapGenerator } from "@/components/ai/EventRecapGenerator";
+import { AttendancePrediction } from "@/components/ai/AttendancePrediction";
+import { EventWithMeta, EventRecap, RsvpStatus } from "@/types/firestore";
 
 interface EventDetail extends EventWithMeta {
   responses: Array<{
@@ -20,6 +23,7 @@ interface EventDetail extends EventWithMeta {
     status: string;
     respondedAt: string;
   }>;
+  recap?: EventRecap;
 }
 
 export default function EventDetailPage({
@@ -94,7 +98,7 @@ export default function EventDetailPage({
         </div>
         {event.isOwner && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => router.push(`/events/${params.id}`)}>
+            <Button variant="outline" size="sm" onClick={() => router.push(`/events/${params.id}/edit`)}>
               <Edit className="mr-1 h-4 w-4" />
               Edit
             </Button>
@@ -145,6 +149,30 @@ export default function EventDetailPage({
               <p className="whitespace-pre-wrap text-sm">{event.description}</p>
             </>
           )}
+
+          <Separator />
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+          >
+            <a
+              href={buildGoogleCalendarUrl({
+                title: event.title,
+                startDateTime: event.startDateTime,
+                endDateTime: event.endDateTime,
+                description: event.description,
+                location: event.location,
+                isVirtual: event.isVirtual,
+                virtualLink: event.virtualLink,
+              })}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <CalendarPlus className="mr-2 h-4 w-4" />
+              Add to Google Calendar
+            </a>
+          </Button>
         </CardContent>
       </Card>
 
@@ -169,6 +197,20 @@ export default function EventDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Attendance Prediction */}
+      {event.isOwner && new Date(event.startDateTime) > new Date() && (
+        <AttendancePrediction
+          eventId={params.id}
+          title={event.title}
+          tags={event.tagNames || []}
+          startDateTime={event.startDateTime}
+          endDateTime={event.endDateTime}
+          isVirtual={event.isVirtual}
+          maxAttendees={event.maxAttendees}
+          variant="card"
+        />
+      )}
 
       {/* Attendees */}
       <Card>
@@ -213,6 +255,22 @@ export default function EventDetailPage({
           tags={event.tagNames}
           alreadyInvited={event.responses.map((r) => r.user.id)}
         />
+      )}
+
+      {/* AI Post-Event Recap */}
+      {event.isOwner && new Date(event.endDateTime) < new Date() && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Event Recap</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EventRecapGenerator
+              eventId={params.id}
+              eventTitle={event.title}
+              existingRecap={event.recap}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

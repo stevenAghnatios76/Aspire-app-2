@@ -56,7 +56,12 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    const ref = await getAdminDb().collection("events").add(eventDoc);
+    // Remove undefined fields before saving to Firestore
+    const cleanEventDoc = Object.fromEntries(
+      Object.entries(eventDoc).filter(([_, v]) => v !== undefined)
+    ) as EventDoc;
+
+    const ref = await getAdminDb().collection("events").add(cleanEventDoc);
 
     // Get creator info
     const creatorSnap = await getAdminDb().collection("users").doc(user.uid).get();
@@ -74,7 +79,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error("Error creating event:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -93,9 +99,12 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
     const filter = searchParams.get("filter") || "upcoming";
+    const sort = searchParams.get("sort") || "startDateTime";
     const order = searchParams.get("order") === "desc" ? "desc" : "asc";
 
-    let query = getAdminDb().collection("events").orderBy("startDateTime", order);
+    // Supported sort fields: startDateTime, createdAt, title
+    const sortField = ["startDateTime", "createdAt", "title"].includes(sort) ? sort : "startDateTime";
+    let query = getAdminDb().collection("events").orderBy(sortField, order);
 
     if (filter === "upcoming") {
       query = query.where("startDateTime", ">=", new Date().toISOString());

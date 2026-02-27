@@ -15,7 +15,7 @@ All AI endpoints live under `/api/ai/*` and require authentication. Each endpoin
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-export const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+export const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 ```
 
 ### Rate Limiting
@@ -688,3 +688,49 @@ export async function checkAIRateLimit(userId: string): Promise<boolean> {
 | A-10 | All AI endpoints return 429 when rate limit exceeded | Rate-limited request returns 429 status |
 | A-11 | All AI endpoints degrade gracefully on OpenAI failure | 502 with user-friendly error message, app remains usable |
 | A-12 | AI responses are valid JSON matching documented schemas | Response validates against Zod output schema |
+
+---
+
+## Implementation Checklist
+
+### Setup
+- [ ] Add Gemini API key (`GEMINI_API_KEY`) to `.env.local` and `.env.example`
+- [ ] Initialize Gemini client in `src/lib/gemini.ts` (`GoogleGenerativeAI` + `getGenerativeModel`)
+- [ ] Implement `callGemini<T>()` wrapper with error handling in `src/lib/ai-helpers.ts`
+- [ ] Implement `checkAIRateLimit(userId)` in `src/lib/ai-helpers.ts` (in-memory for MVP)
+
+### Feature 1 — Smart Scheduling
+- [ ] Create Zod schema `SuggestTimeSchema` in `src/lib/validators.ts`
+- [ ] Implement `POST /api/ai/suggest-time` route
+- [ ] Query attendee busy slots from `eventResponses` collection
+- [ ] Construct Gemini prompt and parse 3 ranked time suggestions
+- [ ] Wire up "Suggest best time" button in the Create Event form
+
+### Feature 2 — Description Generator
+- [ ] Create Zod schema `GenerateDescriptionSchema` in `src/lib/validators.ts`
+- [ ] Implement `POST /api/ai/generate-description` route
+- [ ] Construct Gemini prompt with tone, type, and length constraints
+- [ ] Build `DescriptionGenerator` component with tone selector and preview
+- [ ] Wire up "Generate description" button in the Create Event form
+
+### Feature 3 — NLP Search
+- [ ] Implement `GET /api/ai/search` route
+- [ ] Construct Gemini prompt to parse natural language → structured filters
+- [ ] Execute structured Firestore search with parsed filters
+- [ ] Build `NlpSearchBar` component with smart search mode toggle
+
+### Feature 4 — Conflict Detection
+- [ ] Create Zod schema `CheckConflictsSchema` in `src/lib/validators.ts`
+- [ ] Implement `POST /api/ai/check-conflicts` route
+- [ ] Query overlapping `eventResponses` for the given time range
+- [ ] Construct Gemini prompt for resolution suggestions
+- [ ] Build `ConflictAlert` component (banner + resolution options)
+- [ ] Auto-trigger conflict check on date selection in Create Event form (debounced)
+
+### Feature 5 — Attendee Recommendations
+- [ ] Create Zod schema `SuggestInviteesSchema` in `src/lib/validators.ts`
+- [ ] Implement `POST /api/ai/suggest-invitees` route
+- [ ] Query past events by matching tags; aggregate attendee frequency
+- [ ] Construct Gemini prompt to rank candidates by relevance
+- [ ] Build `InviteeSuggestions` component with one-click invite
+- [ ] Wire up "Suggest people to invite" in the invite modal on the event detail page

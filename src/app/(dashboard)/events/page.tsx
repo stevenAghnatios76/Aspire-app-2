@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, MapPin, Monitor, Users } from "lucide-react";
 import { formatDateTime } from "@/utils/dates";
 import { NlpSearchBar } from "@/components/ai/NlpSearchBar";
+import { EventRecommendations } from "@/components/ai/EventRecommendations";
+import { VoiceEventCreator } from "@/components/ai/VoiceEventCreator";
 
 interface EventSummary {
   id: string;
@@ -51,6 +53,7 @@ export default function EventsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Events</h1>
+        <VoiceEventCreator />
         <Link href="/events/create">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -60,6 +63,8 @@ export default function EventsPage() {
       </div>
 
       <NlpSearchBar />
+
+      <EventRecommendations />
 
       <Tabs value={filter} onValueChange={setFilter}>
         <TabsList>
@@ -87,7 +92,7 @@ export default function EventsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-6">
           {events.map((event) => (
             <Link key={event.id} href={`/events/${event.id}`}>
               <Card className="transition-colors hover:bg-muted/50">

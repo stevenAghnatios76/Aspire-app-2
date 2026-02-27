@@ -107,3 +107,63 @@ export const SuggestInviteesSchema = z.object({
   alreadyInvited: z.array(z.string()).optional(),
   maxSuggestions: z.number().int().min(1).max(20).default(5),
 });
+
+// --- Advanced AI Features ---
+
+export const BuildAgendaSchema = z
+  .object({
+    title: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
+    startDateTime: z.string().datetime(),
+    endDateTime: z.string().datetime(),
+    eventType: z
+      .enum(["conference", "workshop", "meetup", "social", "corporate", "other"])
+      .default("other"),
+    speakerCount: z.number().int().min(1).max(50).optional(),
+    includeBreaks: z.boolean().default(true),
+  })
+  .refine(
+    (d) => new Date(d.endDateTime) > new Date(d.startDateTime),
+    { message: "End time must be after start time" }
+  );
+
+export const GenerateRecapSchema = z.object({
+  eventId: z.string().min(1).max(128),
+  includeAttendeeNames: z.boolean().default(false),
+});
+
+export const PredictAttendanceSchema = z.object({
+  eventId: z.string().min(1).max(128).optional(),
+  title: z.string().min(1).max(200),
+  tags: z.array(z.string().max(50)).max(10).default([]),
+  startDateTime: z.string().datetime(),
+  endDateTime: z.string().datetime(),
+  isVirtual: z.boolean(),
+  maxAttendees: z.number().int().positive().optional(),
+  currentInviteCount: z.number().int().min(0).optional(),
+});
+
+export const VoiceCreateEventSchema = z.object({
+  transcript: z.string().min(5, "Say something about your event").max(1000),
+});
+
+// --- Dashboard ---
+
+export const DashboardAnalyticsSchema = z.object({
+  period: z.enum(["7d", "30d", "90d", "all"]).default("30d"),
+});
+
+// --- Agent ---
+
+export const AgentMessageSchema = z.object({
+  message: z.string().min(1).max(2000),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().max(4000),
+      })
+    )
+    .max(20)
+    .default([]),
+});

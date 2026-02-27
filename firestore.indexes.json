@@ -47,6 +47,22 @@
         { "fieldPath": "eventId", "order": "ASCENDING" },
         { "fieldPath": "inviteeEmail", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "eventResponses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "invitations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "inviterId", "order": "ASCENDING" },
+        { "fieldPath": "sentAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

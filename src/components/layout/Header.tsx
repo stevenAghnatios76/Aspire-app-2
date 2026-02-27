@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarDays, LogOut, Settings, Mail } from "lucide-react";
+import { CalendarDays, LogOut, Settings, Mail, LayoutDashboard } from "lucide-react";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -32,6 +32,10 @@ export function Header() {
             Event Scheduler
           </Link>
           <nav className="flex items-center gap-4 text-sm">
+            <Link href="/dashboard" className="hover:text-foreground text-muted-foreground flex items-center gap-1">
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Dashboard
+            </Link>
             <Link href="/events" className="hover:text-foreground text-muted-foreground">
               Events
             </Link>

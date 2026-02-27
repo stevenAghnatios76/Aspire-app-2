@@ -619,3 +619,45 @@ Sent via **Resend** / **SendGrid** for:
 | C-19 | User can filter events by location | `location=Room` returns partial matches |
 | C-20 | Filters can be combined | Multiple params narrow results correctly |
 | C-21 | Search results are paginated | Pagination object included in response |
+
+---
+
+## Implementation Checklist
+
+### Data Models
+- [ ] Define `EventDocument` interface in `src/types/firestore.ts`
+- [ ] Define `EventResponseDocument` interface in `src/types/firestore.ts`
+- [ ] Define `InvitationDocument` interface in `src/types/firestore.ts`
+- [ ] Define `TagDocument` interface (optional) in `src/types/firestore.ts`
+
+### Event CRUD
+- [ ] Implement `POST /api/events` — create event with Zod validation
+- [ ] Implement `GET /api/events` — paginated list with filters
+- [ ] Implement `GET /api/events/:id` — event detail with access control
+- [ ] Implement `PUT /api/events/:id` — update event (creator only)
+- [ ] Implement `DELETE /api/events/:id` — delete event + cascade deletes (creator only)
+
+### RSVP / Status Tracking
+- [ ] Implement `POST /api/events/:id/rsvp` — upsert RSVP status
+- [ ] Enforce `maxAttendees` capacity check (return 409 when full)
+- [ ] Implement `GET /api/events/:id/responses` — list RSVPs with summary counts
+
+### Invitations
+- [ ] Implement `POST /api/events/:id/invite` — send invitations by email, generate unique tokens
+- [ ] Implement `GET /api/invitations` — list authenticated user's invitations
+- [ ] Implement `PUT /api/invitations/:id/respond` — accept/decline + auto-create EventResponse
+- [ ] Implement `GET /api/invitations/respond?token=xxx` — token-based response page
+
+### Search
+- [ ] Implement `GET /api/events/search` — keyword + filter + pagination
+- [ ] Apply Firestore `where()` filters for date range, tags, `createdById`, `isVirtual`
+- [ ] Apply server-side keyword matching on `title` and `description`
+
+### Notifications
+- [ ] Set up Resend (or SendGrid) email service in `src/lib/email.ts`
+- [ ] Send invitation email on `POST /api/events/:id/invite`
+- [ ] Send "invitation accepted" email to event creator on RSVP accept
+- [ ] Send event-updated email to all attendees on `PUT /api/events/:id`
+- [ ] Send cancellation email to all attendees on `DELETE /api/events/:id`
+- [ ] Implement in-app notification model (optional bonus)
+- [ ] Implement notification API endpoints (`GET`, `PUT /read`, `PUT /read-all`, `GET /unread-count`)

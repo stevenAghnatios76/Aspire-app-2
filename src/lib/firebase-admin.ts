@@ -33,6 +33,11 @@ export function getAdminAuth(): Auth {
 export function getAdminDb(): Firestore {
   if (!_adminDb) {
     _adminDb = getFirestore(ensureApp());
+    try {
+      _adminDb.settings({ ignoreUndefinedProperties: true });
+    } catch (e) {
+      // Ignore if already initialized
+    }
   }
   return _adminDb;
 }

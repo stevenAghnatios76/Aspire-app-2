@@ -72,7 +72,7 @@ If a field cannot be determined, use null.`;
       userPrompt: q,
       temperature: 0.1,
       maxTokens: 500,
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
     });
 
     // Phase 2: Execute Firestore queries based on parsed filters

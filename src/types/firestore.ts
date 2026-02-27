@@ -10,6 +10,21 @@ export interface UserDoc {
 export type RsvpStatus = "UPCOMING" | "ATTENDING" | "MAYBE" | "DECLINED";
 export type InvitationStatus = "PENDING" | "ACCEPTED" | "DECLINED";
 
+export interface EventRecap {
+  summary: string;
+  highlights: string[];
+  attendanceInsights: {
+    totalInvited: number;
+    totalAttended: number;
+    totalDeclined: number;
+    attendanceRate: number;
+    engagementNarrative: string;
+  };
+  followUpActions: string[];
+  shareableText: string;
+  generatedAt: string;
+}
+
 export interface EventDoc {
   title: string;
   description?: string;
@@ -25,6 +40,7 @@ export interface EventDoc {
   tagNames: string[];
   createdAt: string;
   updatedAt: string;
+  recap?: EventRecap;
 }
 
 export interface EventResponseDoc {
@@ -68,4 +84,30 @@ export interface PaginationInfo {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+// --- Dashboard Analytics ---
+
+export interface DashboardAnalytics {
+  eventsCreated: number;
+  eventsCreatedDelta: number; // change vs prior period
+  rsvpBreakdown: {
+    attending: number;
+    maybe: number;
+    declined: number;
+    upcoming: number;
+  };
+  attendanceRate: number; // 0-100
+  attendanceRateDelta: number;
+  eventsTrend: Array<{ period: string; count: number }>;
+  attendanceTrend: Array<{ period: string; rate: number }>;
+  topTags: Array<{ name: string; count: number }>;
+  upcomingCount: number;
+  totalResponses: number;
+}
+
+export interface WeeklySummaryResponse {
+  summary: string;
+  highlights: string[];
+  suggestion: string;
 }

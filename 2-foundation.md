@@ -324,3 +324,56 @@ pnpm dev
 | F-8 | Firestore collections are accessible in production | Documents can be read/written without errors |
 | F-9 | README contains all required sections | Manual review |
 | F-10 | Environment variables are documented in `.env.example` | File exists with all keys |
+
+---
+
+## Implementation Checklist
+
+### Project Scaffolding
+- [ ] Bootstrap Next.js 14 App Router project with TypeScript and TailwindCSS (`create-next-app`)
+- [ ] Configure `tsconfig.json` with path aliases (`@/*`)
+- [ ] Set up `tailwind.config.ts`
+- [ ] Install and configure shadcn/ui
+- [ ] Install pnpm as the package manager
+
+### Firebase Setup
+- [ ] Create Firebase project (Authentication + Firestore)
+- [ ] Enable Email/Password, Google, and GitHub providers in Firebase Auth
+- [ ] Create Firestore database in production mode
+- [ ] Generate Service Account key for Admin SDK
+- [ ] Initialize Firebase Client SDK in `src/lib/firebase.ts`
+- [ ] Initialize Firebase Admin SDK in `src/lib/firebase-admin.ts`
+
+### Authentication
+- [ ] Implement `POST /api/auth/register` with Zod validation + Admin SDK `createUser`
+- [ ] Create Firestore `users/{uid}` document on registration
+- [ ] Implement `AuthContext.tsx` with `onAuthStateChanged` listener
+- [ ] Add Email/Password sign-in (`signInWithEmailAndPassword`)
+- [ ] Add Google OAuth sign-in (`signInWithPopup`)
+- [ ] Add GitHub OAuth sign-in (`signInWithPopup`)
+- [ ] Implement sign-out
+- [ ] Implement `requireAuth()` server-side middleware in `src/lib/auth.ts`
+
+### Environment & Config
+- [ ] Create `.env.local` with all required variables
+- [ ] Create `.env.example` with all keys (empty values)
+- [ ] Add `.env.local` to `.gitignore`
+
+### Deployment
+- [ ] Push code to a GitHub repository
+- [ ] Connect repo to Vercel
+- [ ] Add all environment variables in Vercel project settings
+- [ ] Confirm successful production build (`next build`)
+- [ ] Verify live Vercel URL is publicly accessible
+
+### README
+- [ ] Add Project Title & Description
+- [ ] Add Live Demo URL
+- [ ] Add Tech Stack table
+- [ ] Add Getting Started section (prerequisites, clone, install, env, run)
+- [ ] Add Environment Variables reference
+- [ ] Add Available Scripts section
+- [ ] Add API Documentation summary
+- [ ] Add AI Features highlight
+- [ ] Add Architecture overview
+- [ ] Add Deployment instructions

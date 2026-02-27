@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
+import { EventAssistant } from "@/components/ai/EventAssistant";
 
 export default function DashboardLayout({
   children,
@@ -33,6 +34,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-6">{children}</main>
+      <EventAssistant />
     </div>
   );
 }

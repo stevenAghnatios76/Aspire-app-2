@@ -131,6 +131,13 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     };
 
+    // Remove undefined fields before saving to Firestore
+    for (const key in updates) {
+      if (updates[key] === undefined) {
+        delete updates[key];
+      }
+    }
+
     // Handle tags update
     if (parsed.data.tags) {
       updates.tagNames = parsed.data.tags;
@@ -228,6 +235,44 @@ export async function DELETE(
 
     batch.delete(eventRef);
     await batch.commit();
+
+    // Send cancellation emails to attendees
+    try {
+      const attendeeIds = responsesSnap.docs
+        .map((doc) => doc.data())
+        .filter((r) => r.status === "ATTENDING" || r.status === "MAYBE")
+        .map((r) => r.userId);
+
+      if (attendeeIds.length > 0) {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+
+        for (const attendeeId of attendeeIds) {
+          if (attendeeId === user.uid) continue; // skip creator
+          try {
+            const attendeeSnap = await getAdminDb().collection("users").doc(attendeeId).get();
+            const attendeeData = attendeeSnap.data();
+            if (attendeeData?.email) {
+              await resend.emails.send({
+                from: "Event Scheduler <onboarding@resend.dev>",
+                to: attendeeData.email,
+                subject: `Event Cancelled: ${event.title}`,
+                html: `
+                  <h2>Event Cancelled</h2>
+                  <p>The event <strong>${event.title}</strong> scheduled for ${new Date(event.startDateTime).toLocaleString()} has been cancelled by the organizer.</p>
+                  <p>We apologize for any inconvenience.</p>
+                `,
+              });
+            }
+          } catch (emailErr) {
+            console.error("Failed to send cancellation email to", attendeeId, emailErr);
+          }
+        }
+      }
+    } catch (emailError) {
+      console.error("Error sending cancellation emails:", emailError);
+      // Don't fail the delete if emails fail
+    }
 
     return new NextResponse(null, { status: 204 });
   } catch {

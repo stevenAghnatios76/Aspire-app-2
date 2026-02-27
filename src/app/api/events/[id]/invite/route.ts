@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { InviteSchema } from "@/lib/validators";
-import { InvitationDoc } from "@/types/firestore";
+import { InvitationDoc, EventDoc } from "@/types/firestore";
 import crypto from "crypto";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(
   request: NextRequest,
@@ -22,6 +25,7 @@ export async function POST(
     if (!eventSnap.exists) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
+    const event = eventSnap.data() as EventDoc;
 
     const body = await request.json();
     const parsed = InviteSchema.safeParse(body);
@@ -85,6 +89,34 @@ export async function POST(
         inviteeEmail: email,
         status: "PENDING",
       });
+
+      // Send email via Resend
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const respondUrl = `${appUrl}/invitations/respond?token=${token}`;
+      
+      try {
+        await resend.emails.send({
+          from: "Aspire Events <onboarding@resend.dev>", // Use a verified domain in production
+          to: email,
+          subject: `You're invited to ${event.title}`,
+          html: `
+            <div>
+              <h1>You've been invited to an event!</h1>
+              <p><strong>${event.title}</strong></p>
+              <p>${new Date(event.startDateTime).toLocaleString()}</p>
+              ${message ? `<p><em>"${message}"</em></p>` : ""}
+              <p>
+                <a href="${respondUrl}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px;">
+                  View Invitation & Respond
+                </a>
+              </p>
+            </div>
+          `,
+        });
+      } catch (emailError) {
+        console.error("Failed to send email to", email, emailError);
+        // We still consider the invitation created, even if the email failed
+      }
     }
 
     return NextResponse.json(

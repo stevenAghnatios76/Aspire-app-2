@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DescriptionGenerator } from "@/components/ai/DescriptionGenerator";
+import { AgendaBuilder } from "@/components/ai/AgendaBuilder";
 import { SmartScheduler } from "@/components/ai/SmartScheduler";
 import { ConflictAlert } from "@/components/ai/ConflictAlert";
+import { AttendancePrediction } from "@/components/ai/AttendancePrediction";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -91,10 +93,19 @@ export default function CreateEventPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="description">Description</Label>
-                <DescriptionGenerator
-                  title={title}
-                  onGenerated={setDescription}
-                />
+                <div className="flex gap-1">
+                  <DescriptionGenerator
+                    title={title}
+                    onGenerated={setDescription}
+                  />
+                  <AgendaBuilder
+                    title={title}
+                    description={description}
+                    startDateTime={startDateTime ? new Date(startDateTime).toISOString() : ""}
+                    endDateTime={endDateTime ? new Date(endDateTime).toISOString() : ""}
+                    onGenerated={setDescription}
+                  />
+                </div>
               </div>
               <Textarea
                 id="description"
@@ -232,6 +243,17 @@ export default function CreateEventPage() {
                 value={maxAttendees}
                 onChange={(e) => setMaxAttendees(e.target.value)}
               />
+              {startDateTime && endDateTime && title && (
+                <AttendancePrediction
+                  title={title}
+                  tags={tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : []}
+                  startDateTime={new Date(startDateTime).toISOString()}
+                  endDateTime={new Date(endDateTime).toISOString()}
+                  isVirtual={isVirtual}
+                  maxAttendees={maxAttendees ? parseInt(maxAttendees) : undefined}
+                  variant="inline"
+                />
+              )}
             </div>
           </CardContent>
         </Card>

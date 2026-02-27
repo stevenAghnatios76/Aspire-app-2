@@ -61,7 +61,7 @@ Return JSON:
       userPrompt,
       temperature: 0.7,
       maxTokens: 1000,
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
     });
 
     return NextResponse.json(result);
