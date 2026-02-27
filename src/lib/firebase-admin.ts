@@ -35,7 +35,7 @@ export function getAdminDb(): Firestore {
     _adminDb = getFirestore(ensureApp());
     try {
       _adminDb.settings({ ignoreUndefinedProperties: true });
-    } catch (e) {
+    } catch {
       // Ignore if already initialized
     }
   }

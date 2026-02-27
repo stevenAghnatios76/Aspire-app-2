@@ -10,6 +10,25 @@ import { Calendar, MapPin, Clock, Loader2, CalendarPlus } from "lucide-react";
 import { format } from "date-fns";
 import { buildGoogleCalendarUrl } from "@/utils/google-calendar";
 
+interface InvitationData {
+  event: {
+    id: string;
+    title: string;
+    startDateTime: string;
+    endDateTime: string;
+    location?: string;
+    isVirtual?: boolean;
+    virtualLink?: string;
+    description?: string;
+  };
+  invitation: {
+    id: string;
+    inviteeEmail: string;
+    status: string;
+    message?: string;
+  };
+}
+
 export default function RespondPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -18,7 +37,7 @@ export default function RespondPage() {
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<InvitationData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [responding, setResponding] = useState(false);
 
@@ -38,8 +57,8 @@ export default function RespondPage() {
         }
         const json = await res.json();
         setData(json);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load invitation");
       } finally {
         setLoading(false);
       }
@@ -96,10 +115,10 @@ export default function RespondPage() {
         router.push(`/events/${data.event.id}`);
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Error",
-        description: err.message,
+        description: err instanceof Error ? err.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -140,7 +159,7 @@ export default function RespondPage() {
     <div className="flex min-h-screen items-center justify-center p-4 bg-muted/30">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>You're Invited!</CardTitle>
+          <CardTitle>You&apos;re Invited!</CardTitle>
           <CardDescription>
             You have been invited to attend <strong>{event.title}</strong>
           </CardDescription>
@@ -148,7 +167,7 @@ export default function RespondPage() {
         <CardContent className="space-y-4">
           {invitation.message && (
             <div className="bg-muted p-3 rounded-md italic text-sm border-l-4 border-primary">
-              "{invitation.message}"
+              &quot;{invitation.message}&quot;
             </div>
           )}
           

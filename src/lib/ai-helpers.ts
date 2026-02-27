@@ -116,12 +116,12 @@ function repairTruncatedJson(text: string): string | null {
   // Check if we're inside an unterminated string — find last unescaped quote
   const chars = repaired.split('');
   let inString = false;
-  let lastQuoteIndex = -1;
+  let _lastQuoteIndex = -1;
   for (let i = 0; i < chars.length; i++) {
     if (chars[i] === '\\') { i++; continue; }
     if (chars[i] === '"') {
       inString = !inString;
-      lastQuoteIndex = i;
+      _lastQuoteIndex = i;
     }
   }
   if (inString) {
@@ -190,7 +190,7 @@ export async function callGemini<T>(options: CallGeminiOptions): Promise<T> {
     }
 
     // Strip potential markdown code fences and surrounding text
-    let cleaned = content
+    const cleaned = content
       .replace(/^```json\s*/i, "")
       .replace(/^```\s*/i, "")
       .replace(/\s*```$/i, "")

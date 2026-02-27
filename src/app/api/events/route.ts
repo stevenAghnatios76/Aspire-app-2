@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Remove undefined fields before saving to Firestore
     const cleanEventDoc = Object.fromEntries(
-      Object.entries(eventDoc).filter(([_, v]) => v !== undefined)
+      Object.entries(eventDoc).filter(([, v]) => v !== undefined)
     ) as EventDoc;
 
     const ref = await getAdminDb().collection("events").add(cleanEventDoc);

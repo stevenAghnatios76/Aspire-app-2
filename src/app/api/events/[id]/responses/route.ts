@@ -28,7 +28,12 @@ export async function GET(
       .where("eventId", "==", eventId)
       .get();
 
-    const responses: any[] = [];
+    interface ResponseEntry {
+      user: { id: string; name: string; avatarUrl: string | null };
+      status: string;
+      respondedAt: unknown;
+    }
+    const responses: ResponseEntry[] = [];
     const summary = {
       upcoming: 0,
       attending: 0,

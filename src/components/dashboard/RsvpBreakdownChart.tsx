@@ -73,7 +73,7 @@ export function RsvpBreakdownChart({ data }: RsvpBreakdownChartProps) {
               paddingAngle={3}
               dataKey="value"
             >
-              {chartData.map((entry, index) => (
+              {chartData.map((entry) => (
                 <Cell
                   key={`cell-${entry.name}`}
                   fill={COLORS[Object.keys(LABELS).indexOf(

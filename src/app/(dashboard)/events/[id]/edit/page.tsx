@@ -14,6 +14,19 @@ import { SmartScheduler } from "@/components/ai/SmartScheduler";
 import { ConflictAlert } from "@/components/ai/ConflictAlert";
 import { Loader2 } from "lucide-react";
 
+interface EventData {
+  title?: string;
+  description?: string;
+  startDateTime: string;
+  endDateTime: string;
+  location?: string;
+  isVirtual?: boolean;
+  virtualLink?: string;
+  maxAttendees?: number;
+  isPublic?: boolean;
+  tags?: { name: string }[];
+}
+
 export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();
@@ -37,7 +50,7 @@ export default function EditEventPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const event = await apiRequest<any>(`/api/events/${eventId}`);
+        const event = await apiRequest<EventData>(`/api/events/${eventId}`);
         
         // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
         const formatForInput = (isoString: string) => {
@@ -56,7 +69,7 @@ export default function EditEventPage() {
         setVirtualLink(event.virtualLink || "");
         setMaxAttendees(event.maxAttendees ? event.maxAttendees.toString() : "");
         setIsPublic(event.isPublic ?? true);
-        setTags(event.tags ? event.tags.map((t: any) => t.name).join(", ") : "");
+        setTags(event.tags ? event.tags.map((t: { name: string }) => t.name).join(", ") : "");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load event");
       } finally {
