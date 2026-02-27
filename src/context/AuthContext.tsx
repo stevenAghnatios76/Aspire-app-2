@@ -40,7 +40,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    // Ensure user doc exists in Firestore (handles users created before this fix)
+    const idToken = await cred.user.getIdToken();
+    await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ name: cred.user.displayName || cred.user.email?.split("@")[0] || "User" }),
+    });
   };
 
   const signUp = async (email: string, password: string, name: string) => {

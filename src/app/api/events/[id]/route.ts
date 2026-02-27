@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getAdminDb, getAdminAuth } from "@/lib/firebase-admin";
 import { UpdateEventSchema } from "@/lib/validators";
 import { EventDoc } from "@/types/firestore";
 
@@ -52,10 +52,20 @@ export async function GET(
         if (r.userId === user.uid) myStatus = r.status;
         const userSnap = await getAdminDb().collection("users").doc(r.userId).get();
         const userData = userSnap.data();
+        // Fallback: if no name in Firestore, try Firebase Auth displayName
+        let userName = userData?.name;
+        if (!userName) {
+          try {
+            const authUser = await getAdminAuth().getUser(r.userId);
+            userName = authUser.displayName || authUser.email?.split("@")[0] || "Unknown";
+          } catch {
+            userName = "Unknown";
+          }
+        }
         return {
           user: {
             id: r.userId,
-            name: userData?.name || "Unknown",
+            name: userName,
             avatarUrl: userData?.avatarUrl,
           },
           status: r.status,
@@ -71,12 +81,23 @@ export async function GET(
       .get();
     const creator = creatorSnap.data();
 
+    // Fallback: if no name in Firestore, try Firebase Auth displayName
+    let creatorName = creator?.name;
+    if (!creatorName) {
+      try {
+        const authUser = await import("@/lib/firebase-admin").then(m => m.getAdminAuth().getUser(event.createdById));
+        creatorName = authUser.displayName || authUser.email?.split("@")[0] || "Unknown";
+      } catch {
+        creatorName = "Unknown";
+      }
+    }
+
     return NextResponse.json({
       id: params.id,
       ...event,
       createdBy: {
         id: event.createdById,
-        name: creator?.name || "Unknown",
+        name: creatorName,
         avatarUrl: creator?.avatarUrl,
       },
       tags: (event.tagNames || []).map((name) => ({ name })),
