@@ -61,7 +61,7 @@ export function AttendanceRateChart({
                 borderRadius: "var(--radius)",
                 fontSize: 12,
               }}
-              formatter={(value: number) => [`${value}%`, "Attendance Rate"]}
+              formatter={(value: number | undefined) => [`${value ?? 0}%`, "Attendance Rate"]}
             />
             <ReferenceLine
               y={averageRate}

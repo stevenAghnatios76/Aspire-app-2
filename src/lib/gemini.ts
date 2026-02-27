@@ -1,9 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+let _genAI: GoogleGenerativeAI | null = null;
 
-export function getModel(modelName: string = "gemini-2.5-flash") {
-  return genAI.getGenerativeModel({ model: modelName });
+function getGenAI() {
+  if (!_genAI) {
+    _genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  }
+  return _genAI;
 }
 
-export { genAI };
+export function getModel(modelName: string = "gemini-2.5-flash") {
+  return getGenAI().getGenerativeModel({ model: modelName });
+}
+
+export const genAI = { get instance() { return getGenAI(); } };

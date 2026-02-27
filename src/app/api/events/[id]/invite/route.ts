@@ -6,7 +6,9 @@ import { InvitationDoc, EventDoc } from "@/types/firestore";
 import crypto from "crypto";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function POST(
   request: NextRequest,
@@ -119,7 +121,7 @@ export async function POST(
         `;
 
       try {
-        await resend.emails.send({
+        await getResend().emails.send({
           from: "Aspire Events <onboarding@resend.dev>",
           to: email,
           subject: `You have been invited to ${event.title}`,

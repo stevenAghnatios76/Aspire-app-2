@@ -4,6 +4,8 @@ import { checkAIRateLimit, callGemini } from "@/lib/ai-helpers";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { EventDoc, RsvpStatus } from "@/types/firestore";
 
+export const dynamic = "force-dynamic";
+
 interface RecommendationResult {
   recommendations: Array<{
     eventId: string;

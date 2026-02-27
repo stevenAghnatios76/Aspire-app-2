@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,14 @@ interface InvitationData {
 }
 
 export default function RespondPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <RespondContent />
+    </Suspense>
+  );
+}
+
+function RespondContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
@@ -75,6 +83,8 @@ export default function RespondPage() {
       return;
     }
 
+    if (!data) return;
+
     if (user.email !== data.invitation.inviteeEmail) {
       toast({
         title: "Email mismatch",
@@ -105,10 +115,10 @@ export default function RespondPage() {
       });
       
       // Refresh data to show updated status
-      setData({
-        ...data,
-        invitation: { ...data.invitation, status }
-      });
+      setData(prev => prev ? {
+        ...prev,
+        invitation: { ...prev.invitation, status }
+      } : prev);
       
       // Redirect to event page after a short delay
       setTimeout(() => {
@@ -152,7 +162,7 @@ export default function RespondPage() {
     );
   }
 
-  const { event, invitation } = data;
+  const { event, invitation } = data!;
   const isResponded = invitation.status !== "PENDING";
 
   return (

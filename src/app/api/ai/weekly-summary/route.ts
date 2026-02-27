@@ -4,6 +4,8 @@ import { checkAIRateLimit, callGemini } from "@/lib/ai-helpers";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { EventDoc, EventResponseDoc, WeeklySummaryResponse } from "@/types/firestore";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   let user;
   try {

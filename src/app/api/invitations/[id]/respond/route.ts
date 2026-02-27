@@ -4,7 +4,9 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { InvitationDoc, EventDoc, EventResponseDoc } from "@/types/firestore";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function PUT(
   request: NextRequest,
@@ -101,7 +103,7 @@ export async function PUT(
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
           const eventUrl = `${appUrl}/events/${invitation.eventId}`;
           
-          await resend.emails.send({
+          await getResend().emails.send({
             from: "Aspire Events <onboarding@resend.dev>", // Use a verified domain in production
             to: creatorEmail,
             subject: `RSVP Update: ${event.title}`,

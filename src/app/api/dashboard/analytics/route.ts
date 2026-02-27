@@ -4,6 +4,8 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { DashboardAnalyticsSchema } from "@/lib/validators";
 import { EventDoc, EventResponseDoc, DashboardAnalytics } from "@/types/firestore";
 
+export const dynamic = "force-dynamic";
+
 function getPeriodMs(period: string): number {
   switch (period) {
     case "7d":
