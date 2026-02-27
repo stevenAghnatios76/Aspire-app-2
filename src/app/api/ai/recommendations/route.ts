@@ -172,22 +172,36 @@ Return JSON:
     }
 
     for (const rec of recs) {
-      const event = candidateMap.get(rec.eventId);
+      const rawRec = rec as Record<string, unknown>;
+      const eventId = (rawRec.eventId ?? rawRec.event_id ?? rawRec.id) as string;
+      const event = eventId ? candidateMap.get(eventId) : undefined;
       if (event) {
+        // Extract score from whichever field name the AI used
+        const rawScore =
+          rawRec.relevanceScore ??
+          rawRec.relevance_score ??
+          rawRec.score ??
+          rawRec.relevance ??
+          0;
+        let score =
+          typeof rawScore === "number"
+            ? rawScore
+            : typeof rawScore === "string"
+              ? parseFloat(rawScore) || 0
+              : 0;
+        // Normalize: if the AI returned a percentage (e.g. 85), convert to 0-1
+        if (score > 1) score = score / 100;
+
         enriched.push({
-          eventId: rec.eventId,
+          eventId,
           title: event.title,
           startDateTime: event.startDateTime,
           endDateTime: event.endDateTime,
           location: event.location,
           isVirtual: event.isVirtual,
           tags: event.tagNames || [],
-          relevanceScore: typeof rec.relevanceScore === 'number' && !isNaN(rec.relevanceScore)
-            ? rec.relevanceScore
-            : typeof rec.relevanceScore === 'string'
-              ? parseFloat(rec.relevanceScore) || 0
-              : 0,
-          reason: rec.reason,
+          relevanceScore: score,
+          reason: rec.reason || (rawRec.reason as string) || "",
         });
       }
     }

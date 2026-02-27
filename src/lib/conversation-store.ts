@@ -57,3 +57,18 @@ export async function saveConversationTurn(
     // Fire-and-forget: do not re-throw so failures never affect the chat response
   }
 }
+
+/**
+ * Deletes the entire conversation history for a user.
+ */
+export async function clearConversationHistory(
+  userId: string
+): Promise<void> {
+  try {
+    const db = getAdminDb();
+    await db.collection(COLLECTION).doc(userId).delete();
+  } catch (err) {
+    console.error("[conversation-store] clearConversationHistory error:", err);
+    throw err;
+  }
+}

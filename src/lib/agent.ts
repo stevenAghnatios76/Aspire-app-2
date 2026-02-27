@@ -25,14 +25,14 @@ NEVER:
 - Call create_event or invite_people without first confirming with the user
 - Assume information that wasn't provided — ask for clarification instead`;
 
-export async function createEventAgent(userId: string) {
+export async function createEventAgent(userId: string, userEmail: string, userName?: string) {
   const llm = new ChatGoogleGenerativeAI({
     model: "gemini-2.5-flash",
     apiKey: process.env.GEMINI_API_KEY!,
     temperature: 0.3,
   });
 
-  const tools = buildAgentTools(userId);
+  const tools = buildAgentTools(userId, userEmail, userName);
 
   // Build the system prompt with current date and user ID
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD

@@ -398,7 +398,7 @@ function createCreateEventTool(userId: string) {
 
 // ─── Tool 5: invite_people ───────────────────────────────────────────────────
 
-function createInvitePeopleTool(userId: string) {
+function createInvitePeopleTool(userId: string, userEmail: string, userName?: string) {
   return tool(
     async ({
       eventId,
@@ -476,13 +476,20 @@ function createInvitePeopleTool(userId: string) {
           const respondUrl = `${appUrl}/invitations/respond?token=${token}`;
           const isExistingUser = !!inviteeId;
           const registerUrl = `${appUrl}/register?redirect=${encodeURIComponent("/invitations/respond?token=" + token)}`;
+          const senderName = userName || userEmail;
 
           const emailHtml = isExistingUser
             ? `
               <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-                <p style="font-size:16px">You have been invited to an event.</p>
-                <p>
-                  <a href="${respondUrl}" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px">
+                <h2 style="font-size:20px;color:#333">You're Invited!</h2>
+                <p style="font-size:16px;color:#555">
+                  <strong>${senderName}</strong> has invited you to <strong>${event.title}</strong>.
+                </p>
+                ${event.startDateTime ? `<p style="font-size:14px;color:#777">📅 ${new Date(event.startDateTime).toLocaleString()}</p>` : ""}
+                ${event.location ? `<p style="font-size:14px;color:#777">📍 ${event.location}</p>` : ""}
+                ${message ? `<p style="font-size:14px;color:#555;font-style:italic">"${message}"</p>` : ""}
+                <p style="margin-top:20px">
+                  <a href="${respondUrl}" style="display:inline-block;padding:12px 24px;background-color:#000;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">
                     Respond to Invitation
                   </a>
                 </p>
@@ -490,23 +497,45 @@ function createInvitePeopleTool(userId: string) {
             `
             : `
               <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-                <p style="font-size:16px">You have been invited to an event, please create an account on this link.</p>
-                <p>
-                  <a href="${registerUrl}" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px">
-                    Create Account
+                <h2 style="font-size:20px;color:#333">You're Invited!</h2>
+                <p style="font-size:16px;color:#555">
+                  <strong>${senderName}</strong> has invited you to <strong>${event.title}</strong>.
+                </p>
+                ${event.startDateTime ? `<p style="font-size:14px;color:#777">📅 ${new Date(event.startDateTime).toLocaleString()}</p>` : ""}
+                ${event.location ? `<p style="font-size:14px;color:#777">📍 ${event.location}</p>` : ""}
+                ${message ? `<p style="font-size:14px;color:#555;font-style:italic">"${message}"</p>` : ""}
+                <p style="font-size:14px;color:#555">Create an account to respond to this invitation:</p>
+                <p style="margin-top:20px">
+                  <a href="${registerUrl}" style="display:inline-block;padding:12px 24px;background-color:#000;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">
+                    Create Account & Respond
                   </a>
                 </p>
               </div>
             `;
 
-          await resend.emails.send({
-            from: "Aspire Events <onboarding@resend.dev>",
+          const { data: emailData, error: emailError } = await resend.emails.send({
+            from: `${senderName} via Aspire <onboarding@resend.dev>`,
+            replyTo: userEmail,
             to: email,
-            subject: `You have been invited to ${event.title}`,
+            subject: `${senderName} invited you to ${event.title}`,
             html: emailHtml,
           });
+
+          if (emailError) {
+            console.error("Resend API error for", email, emailError);
+            return JSON.stringify({
+              error: `Invitation was created but the email to ${email} could not be sent: ${emailError.message}. To send emails to external recipients, a verified custom domain is needed at resend.com/domains.`,
+              invited: invited.length,
+              emailFailed: true,
+            });
+          }
         } catch (emailError) {
           console.error("Failed to send invitation email to", email, emailError);
+          return JSON.stringify({
+            error: `Invitation was created but the email to ${email} failed to send due to an unexpected error. The invitation still exists in the system — the invitee can find it by logging in.`,
+            invited: invited.length,
+            emailFailed: true,
+          });
         }
       }
 
@@ -762,13 +791,13 @@ Return JSON:
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 
-export function buildAgentTools(userId: string) {
+export function buildAgentTools(userId: string, userEmail: string, userName?: string) {
   return [
     createSearchEventsTool(),
     createGetMyScheduleTool(userId),
     createCheckConflictsTool(userId),
     createCreateEventTool(userId),
-    createInvitePeopleTool(userId),
+    createInvitePeopleTool(userId, userEmail, userName),
     createSuggestMeetingTimeTool(),
     createBuildAgendaTool(),
   ];

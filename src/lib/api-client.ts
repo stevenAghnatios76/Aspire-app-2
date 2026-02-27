@@ -53,3 +53,10 @@ export async function getConversationHistory(): Promise<ConversationMessage[]> {
     return [];
   }
 }
+
+/**
+ * Deletes the stored conversation history for the current user.
+ */
+export async function clearConversationHistory(): Promise<void> {
+  await apiRequest<void>("/api/ai/agent", { method: "DELETE" });
+}

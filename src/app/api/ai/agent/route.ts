@@ -5,7 +5,7 @@ import { AgentMessageSchema } from "@/lib/validators";
 import { createEventAgent, buildChatHistory } from "@/lib/agent";
 import { HumanMessage } from "@langchain/core/messages";
 import { ToolMessage } from "@langchain/core/messages";
-import { getConversationHistory, saveConversationTurn } from "@/lib/conversation-store";
+import { getConversationHistory, saveConversationTurn, clearConversationHistory } from "@/lib/conversation-store";
 
 interface AgentResponse {
   reply: string;
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const { message, history } = parsed.data;
 
     // Create the agent with the user's context
-    const agent = await createEventAgent(user.uid);
+    const agent = await createEventAgent(user.uid, user.email, user.name);
 
     // Build chat history from previous turns
     const chatHistory = buildChatHistory(history);
@@ -141,5 +141,25 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Conversation history fetch error:", error);
     return NextResponse.json({ history: [] });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  let user;
+  try {
+    user = await requireAuth(request);
+  } catch (response) {
+    return response as NextResponse;
+  }
+
+  try {
+    await clearConversationHistory(user.uid);
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Clear conversation error:", error);
+    return NextResponse.json(
+      { error: "Failed to clear conversation history" },
+      { status: 500 }
+    );
   }
 }

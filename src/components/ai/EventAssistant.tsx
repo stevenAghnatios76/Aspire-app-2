@@ -12,8 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { apiRequest } from "@/lib/api-client";
-import { getConversationHistory } from "@/lib/api-client";
+import { apiRequest, getConversationHistory, clearConversationHistory } from "@/lib/api-client";
 import {
   Bot,
   Send,
@@ -23,6 +22,7 @@ import {
   ChevronRight,
   ExternalLink,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -191,6 +191,18 @@ export function EventAssistant() {
     [sendMessage]
   );
 
+  // Clear the entire chat (local + server)
+  const clearChat = useCallback(async () => {
+    setMessages([{ ...WELCOME_MESSAGE, timestamp: new Date() }]);
+    setInput("");
+    historyLoadedRef.current = false;
+    try {
+      await clearConversationHistory();
+    } catch {
+      // Best-effort: local state is already cleared
+    }
+  }, []);
+
   // Retry the last failed message
   const retryLastMessage = useCallback(() => {
     setMessages((prev) => {
@@ -228,12 +240,23 @@ export function EventAssistant() {
           <SheetHeader className="px-4 py-3 border-b shrink-0">
             <SheetTitle className="flex items-center gap-2 text-left">
               <Bot className="h-5 w-5 text-primary" />
-              <div>
+              <div className="flex-1">
                 <div className="text-base font-semibold">Event Assistant</div>
                 <div className="text-xs text-muted-foreground font-normal">
                   
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={clearChat}
+                disabled={loading || messages.length <= 1}
+                title="Clear chat"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Clear chat</span>
+              </Button>
             </SheetTitle>
           </SheetHeader>
 
