@@ -119,7 +119,7 @@ export function NlpSearchBar() {
               ))}
             </div>
 
-            {results.data.length === 0 ? (
+            {results.data?.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 No events match your search
               </p>

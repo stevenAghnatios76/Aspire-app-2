@@ -84,8 +84,8 @@ export default function EventDetailPage({
 
   if (!event) return null;
 
-  const attendingCount = event.responses.filter((r) => r.status === "ATTENDING").length;
-  const maybeCount = event.responses.filter((r) => r.status === "MAYBE").length;
+  const attendingCount = (event.responses ?? []).filter((r) => r.status === "ATTENDING").length;
+  const maybeCount = (event.responses ?? []).filter((r) => r.status === "MAYBE").length;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -223,11 +223,11 @@ export default function EventDetailPage({
           </div>
         </CardHeader>
         <CardContent>
-          {event.responses.length === 0 ? (
+          {(event.responses ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">No RSVPs yet</p>
           ) : (
             <div className="space-y-2">
-              {event.responses.map((r) => (
+              {(event.responses ?? []).map((r) => (
                 <div key={r.user.id} className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={r.user.avatarUrl} />
@@ -253,7 +253,7 @@ export default function EventDetailPage({
           eventTitle={event.title}
           eventDescription={event.description}
           tags={event.tagNames}
-          alreadyInvited={event.responses.map((r) => r.user.id)}
+          alreadyInvited={(event.responses ?? []).map((r) => r.user.id)}
         />
       )}
 

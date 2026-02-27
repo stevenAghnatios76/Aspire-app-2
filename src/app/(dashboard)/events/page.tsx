@@ -125,10 +125,10 @@ export default function EventsPage() {
                     )}
                     <span className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {event.responseCount.attending} attending
+                      {event.responseCount?.attending ?? 0} attending
                     </span>
                   </div>
-                  {event.tags.length > 0 && (
+                  {event.tags?.length > 0 && (
                     <div className="mt-2 flex gap-1">
                       {event.tags.map((tag) => (
                         <Badge key={tag.name} variant="outline" className="text-xs">

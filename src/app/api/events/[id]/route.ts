@@ -79,7 +79,7 @@ export async function GET(
         name: creator?.name || "Unknown",
         avatarUrl: creator?.avatarUrl,
       },
-      tags: event.tagNames.map((name) => ({ name })),
+      tags: (event.tagNames || []).map((name) => ({ name })),
       responses,
       myStatus,
       isOwner: event.createdById === user.uid,

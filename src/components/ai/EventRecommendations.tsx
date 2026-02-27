@@ -58,7 +58,7 @@ export function EventRecommendations() {
   }, []);
 
   // Don't render anything if no data or no recommendations
-  if (!loading && (!data || data.recommendations.length === 0)) {
+  if (!loading && (!data || !data.recommendations || data.recommendations.length === 0)) {
     return null;
   }
 
@@ -132,7 +132,7 @@ export function EventRecommendations() {
                           ) : null}
                         </div>
 
-                        {rec.tags.length > 0 && (
+                        {rec.tags?.length > 0 && (
                           <div className="flex gap-1 flex-wrap">
                             {rec.tags.slice(0, 3).map((tag) => (
                               <Badge

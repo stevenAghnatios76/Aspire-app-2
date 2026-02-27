@@ -80,7 +80,7 @@ export function ConflictAlert({ startDateTime, endDateTime, eventTitle }: Confli
             </div>
           ))}
 
-          {data.resolutions.length > 0 && (
+          {data.resolutions?.length > 0 && (
             <div className="mt-3 space-y-2">
               <p className="text-sm font-medium">Suggestions:</p>
               {data.resolutions.map((res, i) => (

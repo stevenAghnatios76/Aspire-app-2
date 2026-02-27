@@ -354,7 +354,7 @@ export function VoiceEventCreator() {
                   </div>
                 )}
 
-                {result.missingFields.length > 0 && (
+                {result.missingFields?.length > 0 && (
                   <p className="text-xs text-muted-foreground">
                     Missing: {result.missingFields.join(", ")}
                   </p>

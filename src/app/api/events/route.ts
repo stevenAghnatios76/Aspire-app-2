@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
           },
           responseCount: counts,
           myStatus,
-          tags: event.tagNames.map((name) => ({ name })),
+          tags: (event.tagNames || []).map((name) => ({ name })),
         };
       })
     );
