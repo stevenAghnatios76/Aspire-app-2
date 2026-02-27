@@ -84,7 +84,7 @@ Return JSON:
       systemPrompt,
       userPrompt,
       temperature: 0.5,
-      maxTokens: 1500,
+      maxTokens: 4096,
       model: "gemini-2.5-flash",
     });
 

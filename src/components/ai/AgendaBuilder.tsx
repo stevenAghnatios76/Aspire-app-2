@@ -91,9 +91,29 @@ export function AgendaBuilder({
     });
   };
 
+  // Filter out incomplete items from truncated JSON repair
+  const completeAgenda = (data?.agenda ?? []).filter(
+    (item) => item.title && item.description && item.startOffset != null && item.endOffset != null
+  );
+
   const handleUseAsDescription = () => {
-    if (data?.formattedText) {
-      onGenerated(data.formattedText);
+    if (!data) return;
+
+    // Use formattedText from the API when available; otherwise build it
+    // from the complete agenda items (covers truncated responses where
+    // formattedText was lost during JSON repair).
+    const text =
+      data.formattedText ||
+      completeAgenda
+        .map(
+          (item) =>
+            `${formatOffset(item.startOffset)} – ${formatOffset(item.endOffset)}  **${item.title}**\n${item.description}${item.speaker ? ` _(${item.speaker})_` : ""}`
+        )
+        .join("\n\n") ||
+      "";
+
+    if (text) {
+      onGenerated(text);
       setOpen(false);
       reset();
     }
@@ -184,10 +204,10 @@ export function AgendaBuilder({
             <p className="text-sm text-destructive">{error}</p>
           )}
 
-          {data && (
+          {data && completeAgenda.length > 0 && (
             <div className="space-y-3">
               <div className="rounded-lg border p-3 space-y-2">
-                {data.agenda.map((item, i) => (
+                {completeAgenda.map((item, i) => (
                   <div key={i} className="flex items-start gap-3 py-1.5">
                     <span className="min-w-[80px] text-xs font-mono text-muted-foreground">
                       {formatOffset(item.startOffset)} – {formatOffset(item.endOffset)}

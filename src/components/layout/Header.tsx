@@ -10,10 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarDays, LogOut, Settings, Mail, LayoutDashboard } from "lucide-react";
+import { CalendarDays, LogOut, Settings, Mail, LayoutDashboard, Info } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function Header() {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const isInfoActive = pathname === "/info";
 
   const initials = user?.displayName
     ? user.displayName
@@ -50,6 +53,22 @@ export function Header() {
             <Button variant="ghost" size="icon">
               <Mail className="h-4 w-4" />
             </Button>
+          </Link>
+
+          <Link href="/info" className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={isInfoActive ? "text-foreground" : "text-muted-foreground"}
+            >
+              <Info className="h-4 w-4" />
+            </Button>
+            {!isInfoActive && (
+              <span className="absolute top-0 right-0 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500" />
+              </span>
+            )}
           </Link>
 
           <DropdownMenu>

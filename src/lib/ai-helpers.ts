@@ -129,6 +129,16 @@ function repairTruncatedJson(text: string): string | null {
     repaired += '"';
   }
 
+  // Remove incomplete key-value pair at the end of an object:
+  // e.g. , "description"  or  , "key": "partial"  or  , "key": partial
+  // This handles cases where Gemini truncates mid-property.
+  // Remove a trailing orphan key (key with no colon/value)
+  repaired = repaired.replace(/,\s*"[^"]*"\s*$/, '');
+  // Remove a trailing incomplete key-value pair (key with colon but incomplete/partial value)
+  repaired = repaired.replace(/,\s*"[^"]*"\s*:\s*"[^"]*"?\s*$/, '');
+  // Remove a trailing incomplete array element or primitive
+  repaired = repaired.replace(/,\s*"[^"]*"\s*:\s*[^\]},]*$/, '');
+
   // Remove any trailing comma after the last value
   repaired = repaired.replace(/,\s*$/, '');
 
@@ -148,8 +158,32 @@ function repairTruncatedJson(text: string): string | null {
   }
 
   // Validate the repaired JSON actually parses
-  JSON.parse(repaired); // throws if still invalid
-  return repaired;
+  try {
+    JSON.parse(repaired);
+    return repaired;
+  } catch {
+    // Last resort: try stripping the last incomplete element from an array
+    // e.g. [{...}, {incomplete...}] → [{...}]
+    const lastCompleteElement = repaired.replace(/,\s*\{[^}]*$/, '');
+    const cleaned = lastCompleteElement.replace(/,\s*$/, '');
+    // Re-close brackets
+    const stack2: string[] = [];
+    let inStr2 = false;
+    for (let i = 0; i < cleaned.length; i++) {
+      if (cleaned[i] === '\\' && inStr2) { i++; continue; }
+      if (cleaned[i] === '"') { inStr2 = !inStr2; continue; }
+      if (inStr2) continue;
+      if (cleaned[i] === '{') stack2.push('}');
+      else if (cleaned[i] === '[') stack2.push(']');
+      else if (cleaned[i] === '}' || cleaned[i] === ']') stack2.pop();
+    }
+    let final = cleaned;
+    while (stack2.length > 0) {
+      final += stack2.pop();
+    }
+    JSON.parse(final); // throws if still invalid
+    return final;
+  }
 }
 
 // --- Gemini Call Wrapper ---
