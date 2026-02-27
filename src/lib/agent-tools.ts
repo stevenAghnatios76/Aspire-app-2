@@ -476,24 +476,36 @@ function createInvitePeopleTool(userId: string) {
           const appUrl =
             process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
           const respondUrl = `${appUrl}/invitations/respond?token=${token}`;
+          const isExistingUser = !!inviteeId;
+          const registerUrl = `${appUrl}/register?redirect=${encodeURIComponent("/invitations/respond?token=" + token)}`;
+
+          const emailHtml = isExistingUser
+            ? `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+                <p style="font-size:16px">You have been invited to an event.</p>
+                <p>
+                  <a href="${respondUrl}" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px">
+                    Respond to Invitation
+                  </a>
+                </p>
+              </div>
+            `
+            : `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+                <p style="font-size:16px">You have been invited to an event, please create an account on this link.</p>
+                <p>
+                  <a href="${registerUrl}" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px">
+                    Create Account
+                  </a>
+                </p>
+              </div>
+            `;
 
           await resend.emails.send({
             from: "Aspire Events <onboarding@resend.dev>",
             to: email,
-            subject: `You're invited to ${event.title}`,
-            html: `
-              <div>
-                <h1>You've been invited to an event!</h1>
-                <p><strong>${event.title}</strong></p>
-                <p>${new Date(event.startDateTime).toLocaleString()}</p>
-                ${message ? `<p><em>"${message}"</em></p>` : ""}
-                <p>
-                  <a href="${respondUrl}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px;">
-                    View Invitation & Respond
-                  </a>
-                </p>
-              </div>
-            `,
+            subject: `You have been invited to ${event.title}`,
+            html: emailHtml,
           });
         } catch (emailError) {
           console.error("Failed to send invitation email to", email, emailError);
