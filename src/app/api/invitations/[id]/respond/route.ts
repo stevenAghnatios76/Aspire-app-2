@@ -99,7 +99,7 @@ export async function PUT(
         const creatorEmail = creatorSnap.data()?.email;
         if (creatorEmail) {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-          const eventUrl = `${appUrl}/events/${event.id}`;
+          const eventUrl = `${appUrl}/events/${invitation.eventId}`;
           
           await resend.emails.send({
             from: "Aspire Events <onboarding@resend.dev>", // Use a verified domain in production
