@@ -204,13 +204,11 @@ export async function GET(request: NextRequest) {
     }
 
     // --- Query 3: Top tags from attended events ---
-    const attendedEventIds = [
-      ...new Set(
-        responses
-          .filter((r) => r.status === "ATTENDING" || r.status === "UPCOMING")
-          .map((r) => r.eventId)
-      ),
-    ];
+    const attendedEventIds = Array.from(new Set(
+      responses
+        .filter((r) => r.status === "ATTENDING" || r.status === "UPCOMING")
+        .map((r) => r.eventId)
+    ));
 
     const tagFrequency: Record<string, number> = {};
     // Also count tags from created events

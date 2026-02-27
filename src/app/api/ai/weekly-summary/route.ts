@@ -45,12 +45,10 @@ export async function GET(request: NextRequest) {
     );
 
     // Fetch event details for all responses
-    const allEventIds = [
-      ...new Set([
-        ...pastResponses.map((r) => r.eventId),
-        ...upcomingResponses.map((r) => r.eventId),
-      ]),
-    ];
+    const allEventIds = Array.from(new Set([
+      ...pastResponses.map((r) => r.eventId),
+      ...upcomingResponses.map((r) => r.eventId),
+    ]));
 
     const eventMap: Record<string, EventDoc & { id: string }> = {};
     for (let i = 0; i < allEventIds.length; i += 30) {

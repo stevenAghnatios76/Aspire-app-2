@@ -144,7 +144,7 @@ function createGetMyScheduleTool(userId: string) {
         .filter((r) => r.eventStartDateTime <= cutoff);
 
       // Batch-fetch events
-      const eventIds = [...new Set(responses.map((r) => r.eventId))];
+      const eventIds = Array.from(new Set(responses.map((r) => r.eventId)));
       const eventMap = new Map<string, EventDoc>();
 
       for (let i = 0; i < eventIds.length; i += 10) {
@@ -233,11 +233,9 @@ function createCheckConflictsTool(userId: string) {
       }
 
       // Fetch conflicting event details
-      const eventIds = [
-        ...new Set(
-          conflicting.map((doc) => (doc.data() as EventResponseDoc).eventId)
-        ),
-      ];
+      const eventIds = Array.from(new Set(
+        conflicting.map((doc) => (doc.data() as EventResponseDoc).eventId)
+      ));
 
       const conflicts = await Promise.all(
         eventIds.map(async (eventId) => {

@@ -204,12 +204,12 @@ export default function EditEventPage() {
               <ConflictAlert
                 startDateTime={startDateTime}
                 endDateTime={endDateTime}
-                eventId={eventId}
               />
             )}
 
             <div className="pt-2">
               <SmartScheduler
+                title={title}
                 onTimeSelected={(start, end) => {
                   setStartDateTime(start);
                   setEndDateTime(end);
