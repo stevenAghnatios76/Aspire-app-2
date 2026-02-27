@@ -513,7 +513,7 @@ function createInvitePeopleTool(userId: string, userEmail: string, userName?: st
               </div>
             `;
 
-          const { data: emailData, error: emailError } = await resend.emails.send({
+          const { data: _emailData, error: emailError } = await resend.emails.send({
             from: `${senderName} via Aspire <onboarding@resend.dev>`,
             replyTo: userEmail,
             to: email,
