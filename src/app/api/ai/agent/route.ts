@@ -5,6 +5,7 @@ import { AgentMessageSchema } from "@/lib/validators";
 import { createEventAgent, buildChatHistory } from "@/lib/agent";
 import { HumanMessage } from "@langchain/core/messages";
 import { ToolMessage } from "@langchain/core/messages";
+import { getConversationHistory, saveConversationTurn } from "@/lib/conversation-store";
 
 interface AgentResponse {
   reply: string;
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest) {
       ...(eventIds.length > 0 ? { eventIds } : {}),
     };
 
+    // Persist this turn server-side (fire-and-forget)
+    saveConversationTurn(user.uid, message, reply).catch(() => {});
+
     return NextResponse.json(response);
   } catch (error) {
     console.error("AI Agent error:", error);
@@ -120,5 +124,22 @@ export async function POST(request: NextRequest) {
       { error: "AI assistant temporarily unavailable. Please try again later." },
       { status: 502 }
     );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  let user;
+  try {
+    user = await requireAuth(request);
+  } catch (response) {
+    return response as NextResponse;
+  }
+
+  try {
+    const history = await getConversationHistory(user.uid);
+    return NextResponse.json({ history });
+  } catch (error) {
+    console.error("Conversation history fetch error:", error);
+    return NextResponse.json({ history: [] });
   }
 }

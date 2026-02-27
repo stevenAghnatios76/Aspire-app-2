@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/api-client";
+import { getConversationHistory } from "@/lib/api-client";
 import {
   Bot,
   Send,
@@ -67,8 +68,30 @@ export function EventAssistant() {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hydrating, setHydrating] = useState(false);
+  const historyLoadedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch stored conversation history when the sheet is first opened
+  useEffect(() => {
+    if (!open || historyLoadedRef.current) return;
+    historyLoadedRef.current = true;
+
+    setHydrating(true);
+    getConversationHistory()
+      .then((storedMessages) => {
+        if (storedMessages.length === 0) return;
+        const restored: Message[] = storedMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.timestamp),
+        }));
+        // Prepend restored history after the welcome message
+        setMessages([{ ...WELCOME_MESSAGE, timestamp: new Date() }, ...restored]);
+      })
+      .finally(() => setHydrating(false));
+  }, [open]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -83,6 +106,8 @@ export function EventAssistant() {
       setMessages([{ ...WELCOME_MESSAGE, timestamp: new Date() }]);
       setInput("");
       setLoading(false);
+      setHydrating(false);
+      historyLoadedRef.current = false;
     }
   }, []);
 
@@ -214,6 +239,14 @@ export function EventAssistant() {
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            {/* History loading indicator */}
+            {hydrating && (
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Restoring conversation…
+              </div>
+            )}
+
             {messages.map((msg, i) => (
               <MessageBubble key={i} message={msg} />
             ))}

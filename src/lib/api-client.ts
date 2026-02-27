@@ -1,4 +1,5 @@
 import { auth } from "./firebase";
+import type { ConversationMessage } from "@/types/firestore";
 
 export class ApiError extends Error {
   constructor(
@@ -38,4 +39,17 @@ export async function apiRequest<T>(
 
   if (res.status === 204) return undefined as T;
   return res.json();
+}
+
+/**
+ * Fetches the stored conversation history for the current user.
+ * Returns an empty array on any error so the UI degrades gracefully.
+ */
+export async function getConversationHistory(): Promise<ConversationMessage[]> {
+  try {
+    const data = await apiRequest<{ history: ConversationMessage[] }>("/api/ai/agent");
+    return data.history ?? [];
+  } catch {
+    return [];
+  }
 }

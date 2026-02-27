@@ -111,3 +111,16 @@ export interface WeeklySummaryResponse {
   highlights: string[];
   suggestion: string;
 }
+
+// --- Conversation Memory ---
+
+export interface ConversationMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number; // Unix ms
+}
+
+export interface ConversationDoc {
+  messages: ConversationMessage[];
+  updatedAt: number; // Unix ms
+}
