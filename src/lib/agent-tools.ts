@@ -136,12 +136,12 @@ function createGetMyScheduleTool(userId: string) {
         .collection("eventResponses")
         .where("userId", "==", userId)
         .where("status", "in", ["ATTENDING", "UPCOMING"])
-        .where("eventStartDateTime", ">=", now.toISOString())
         .get();
 
+      const nowISO = now.toISOString();
       const responses = responsesSnap.docs
         .map((doc) => doc.data() as EventResponseDoc)
-        .filter((r) => r.eventStartDateTime <= cutoff);
+        .filter((r) => r.eventStartDateTime >= nowISO && r.eventStartDateTime <= cutoff);
 
       // Batch-fetch events
       const eventIds = Array.from(new Set(responses.map((r) => r.eventId)));
